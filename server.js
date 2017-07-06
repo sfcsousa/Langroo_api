@@ -4,18 +4,27 @@ let app =  express();
 let bodyParser = require('body-parser');
 let google = require('googleapis');
 let MongoClient = require('mongodb').MongoClient;
+let Server = require('mongodb').Server;
 let assert = require('assert');
 let authentication = require("./authentication");
 
 var url = 'mongodb://localhost:27017/';
+var port = 9000;
 
 app.use(bodyParser.json());
 
+app.get('/',function(req,res){
+	res.send('root route of server! ' +  port);
+	res.end();
+});
+
 app.post('/insertOrUpd/Student',function(req,res){
-	var doc = req.body,
+	var doc = req.query,
 		collection = 'tb_students',
 		dtbase = 'langroo';
-	console.log("student");
+	console.log('Name: '+req.query.firstName);	
+	console.log('test: '+req.query.castan);
+	console.log("student 2");
 	console.log(doc);	
 	
 	authentication.authenticate().then((auth)=>{
@@ -46,7 +55,7 @@ function appendData(auth, doc) {
     range: 'teste123!A2:B', //Change Sheet1 if your worksheet's name is something else
     valueInputOption: "USER_ENTERED",
     resource: {
-      values: [ [doc.name, "Test", "Eg"]]
+      values: [ [doc.firstName, doc.castan, "test - Eg"]]
     }
   }, (err, response) => {
     if (err) {
@@ -58,6 +67,6 @@ function appendData(auth, doc) {
   });
 }
 
-app.listen(7979);
+app.listen(port);
 
-console.log("Hom - server running on port 7979");
+console.log("Hom - server running on port",port);
