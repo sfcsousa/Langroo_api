@@ -22,11 +22,8 @@ app.post('/insertOrUpd/Student',function(req,res){
 	var doc = req.query,
 		collection = 'tb_students',
 		dtbase = 'langroo';
-	console.log('Name: '+req.query.firstName);	
-	console.log('test: '+req.query.castan);
-	console.log("student 2");
 	console.log(doc);	
-	
+	doc.starDate = "date"
 	authentication.authenticate().then((auth)=>{
 		appendData(auth, doc);
 	});
@@ -38,11 +35,43 @@ app.post('/insertOrUpd/Student',function(req,res){
 
 var insertRowMongo = function(doc, collection, dtbase){
 	MongoClient.connect(url+dtbase, function(err, db) {
-	  if (err) throw err;
-	  db.collection(collection).insertOne(doc, function(err, res) {
-		if (err) throw err;
-		console.log("1 record inserted");
-		db.close();
+	  if (err) throw err;	  
+	  db.collection(collection).find({ msgId:doc.msgId }).toArray(function(err,docs){
+		  if (docs.length > 0 ){
+			  db.collection(collection).update(
+				{query:{ msgId:doc.msgId }},
+				{$set : {
+						First_Name : doc.First_Name,
+						Last_Name : doc.Last_Name,
+						User_Email : doc.User_Email,
+						Profile_Picture : doc.Profile_Picture,
+						Last_Interaction_Date : doc.Last_Interaction_Date,
+						LanguageSchool : doc.LanguageSchool,
+						HelpCancelPlan : doc.HelpCancelPlan,
+						Language_Chosen  : doc.Language_Chosen,
+						Hear_About_Us : doc.Hear_About_Us,
+						User_Language_Level : doc.User_Language_Level,
+						User_Motivation : doc.User_Motivation,
+						Start_Learning_Want_Tutor : '',
+						Tutor_Gender : doc.Tutor_Gender,
+						user_time : doc.user_time,
+						user_accent : doc.user_accent,
+						user_interests : doc.user_interests,
+						locale : doc.locale}
+				},
+				{ upsert: true },
+				function(err,res){
+					if (err) throw err;
+					console.log("1 record updated");
+					db.close();
+				});
+		  }else{
+			db.collection(collection).insertOne(doc, function(err, res) {
+				if (err) throw err;
+				console.log("1 record inserted");
+				db.close();
+			});  
+		  }		  
 	  });
 	});
 }
