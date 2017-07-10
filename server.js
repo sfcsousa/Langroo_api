@@ -18,46 +18,55 @@ app.get('/',function(req,res){
 	res.end();
 });
 
-app.post('/insertOrUpd/Student',function(req,res){
+app.get('/insertOrUpd/Student',function(req,res){
 	var doc = req.query,
 		collection = 'tb_students',
 		dtbase = 'langroo';
-	console.log(doc);	
-	doc.starDate = "date"
+	doc.startDate = "date"
 	authentication.authenticate().then((auth)=>{
 		appendData(auth, doc);
 	});
 	insertRowMongo(doc, collection, dtbase); 
 	
-	res.send('inserted');
-	res.end();
+	res.json({ok:'ok'});
 });
 
 var insertRowMongo = function(doc, collection, dtbase){
 	MongoClient.connect(url+dtbase, function(err, db) {
 	  if (err) throw err;	  
-	  db.collection(collection).find({ msgId:doc.msgId }).toArray(function(err,docs){
+	  db.collection(collection).find({ 'messenger user id':doc['messenger user id'] }).toArray(function(err,docs){
 		  if (docs.length > 0 ){
 			  db.collection(collection).update(
-				{query:{ msgId:doc.msgId }},
+				{query:{ 'messenger user id':doc['messenger user id']}},
 				{$set : {
-						First_Name : doc.First_Name,
-						Last_Name : doc.Last_Name,
-						User_Email : doc.User_Email,
-						Profile_Picture : doc.Profile_Picture,
-						Last_Interaction_Date : doc.Last_Interaction_Date,
-						LanguageSchool : doc.LanguageSchool,
-						HelpCancelPlan : doc.HelpCancelPlan,
-						Language_Chosen  : doc.Language_Chosen,
-						Hear_About_Us : doc.Hear_About_Us,
-						User_Language_Level : doc.User_Language_Level,
-						User_Motivation : doc.User_Motivation,
-						Start_Learning_Want_Tutor : '',
-						Tutor_Gender : doc.Tutor_Gender,
-						user_time : doc.user_time,
-						user_accent : doc.user_accent,
-						user_interests : doc.user_interests,
-						locale : doc.locale}
+					"first name" : doc["first name"],
+					"last name" :  doc["last name"],
+					"profile pic url" : doc["profile pic url"],
+					"languageSchool" : doc["languageSchool"],
+					"helpCancelPlan" : doc["helpCancelPlan"],
+					"languageChose" : doc["languageChose"],
+					"userHearAboutUs" : doc["userHearAboutUs"],
+					"userLevel" : doc["userLevel"],
+					"UserMotivation" : doc["UserMotivation"],
+					"userAccent" : doc["userAccent"],
+					"userDecision" : doc["userDecision"],
+					"userInterests" : doc["userInterests"],
+					"tutorGenre" : doc["tutorGenre"],
+					"lessonContent" : doc["lesssonContent"],
+					"lessonImage" : doc["lessonImage"],
+					"lessonCounter" : doc["lessonCounter"],
+					"userActive" : doc["userActive"],
+					"userCantAfford" : doc["userCantAfford"],
+					"userLesson" : doc["userLesson"],
+					"languageSchoolCoupon" : doc["languageSchoolCoupon"],
+					"userAge" : doc["userAge"],
+					"feedback" : doc["feedback"],
+					"generalComments" : doc["generalComments"],
+					"generalFeedbackQuestion1" : doc["generalFeedbackQuestion1"],
+					"generalFeedbackQuestion2" : doc["generalFeedbackQuestion2"],
+					"generalFeedbackQuestion3" : doc["generalFeedbackQuestion3"],
+					"generalFeedbackQuestion4" : doc["generalFeedbackQuestion4"],
+					"generalFeedbackQuestion5" : doc["generalFeedbackQuestion5"]}
 				},
 				{ upsert: true },
 				function(err,res){
@@ -81,10 +90,24 @@ function appendData(auth, doc) {
   sheets.spreadsheets.values.append({
     auth: auth,
     spreadsheetId: '10utEusTbOMFvtxeqp8XgpfFiJxv6cYy0aOSdVzAkuTI',
-    range: 'teste123!A2:B', //Change Sheet1 if your worksheet's name is something else
+    range: 'teste123!A2:P', //Change Sheet1 if your worksheet's name is something else
     valueInputOption: "USER_ENTERED",
     resource: {
-      values: [ [doc.firstName, doc.castan, "test - Eg"]]
+      values: [ [doc['messenger user id'],
+				doc['last name'],	
+				doc['startDate'],	
+				doc['first name'],
+				doc['languageChose'],
+				doc['userLevel'],
+				null,
+				doc['lessonImage'],
+				null,
+				doc['lessonContent'],
+				null,
+				null,
+				null,
+				null,
+				doc['lessonCounter']]]
     }
   }, (err, response) => {
     if (err) {
