@@ -22,7 +22,7 @@ app.get('/insertOrUpd/Student',function(req,res){
 	var doc = req.query,
 		collection = 'tb_students',
 		dtbase = 'langroo';
-	doc.startDate = "date"
+	doc.startDate = getDate();
 	authentication.authenticate().then((auth)=>{
 		appendData(auth, doc);
 	});
@@ -31,13 +31,14 @@ app.get('/insertOrUpd/Student',function(req,res){
 	res.json({ok:'ok'});
 });
 
+
 var insertRowMongo = function(doc, collection, dtbase){
 	MongoClient.connect(url+dtbase, function(err, db) {
 	  if (err) throw err;	  
 	  db.collection(collection).find({ 'messenger user id':doc['messenger user id'] }).toArray(function(err,docs){
 		  if (docs.length > 0 ){
 			  db.collection(collection).update(
-				{query:{ 'messenger user id':doc['messenger user id']}},
+				{ 'messenger user id' : doc['messenger user id']},
 				{$set : {
 					"first name" : doc["first name"],
 					"last name" :  doc["last name"],
@@ -62,6 +63,7 @@ var insertRowMongo = function(doc, collection, dtbase){
 					"userAge" : doc["userAge"],
 					"feedback" : doc["feedback"],
 					"generalComments" : doc["generalComments"],
+					"myDate" : doc['startDate'],
 					"generalFeedbackQuestion1" : doc["generalFeedbackQuestion1"],
 					"generalFeedbackQuestion2" : doc["generalFeedbackQuestion2"],
 					"generalFeedbackQuestion3" : doc["generalFeedbackQuestion3"],
@@ -93,7 +95,7 @@ function appendData(auth, doc) {
     range: 'teste123!A2:P', //Change Sheet1 if your worksheet's name is something else
     valueInputOption: "USER_ENTERED",
     resource: {
-      values: [ [doc['messenger user id'],
+      values: [ [doc['messenger user id'].toString(),
 				doc['last name'],	
 				doc['startDate'],	
 				doc['first name'],
@@ -107,7 +109,8 @@ function appendData(auth, doc) {
 				null,
 				null,
 				null,
-				doc['lessonCounter']]]
+				doc['lessonCounter']]
+				]
     }
   }, (err, response) => {
     if (err) {
@@ -119,6 +122,20 @@ function appendData(auth, doc) {
   });
 }
 
+var getDate = function(){
+	var fullDate = new Date();
+	var date = fullDate.getDate().toString();
+	if (date.length == 1) {
+		date =0+date;
+	}
+	var month = (fullDate.getMonth()+1).toString();
+	if (month.length == 1) {
+		month =0+month;
+	}
+	var hour = fullDate.getHours(),
+		min = fullDate.getMinutes()
+	return date+"/"+month+"/"+fullDate.getFullYear()+" "+hour+":"+min;
+};
 app.listen(port);
 
 console.log("Hom - server running on port",port);
