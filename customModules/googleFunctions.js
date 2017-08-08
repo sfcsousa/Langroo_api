@@ -15,7 +15,11 @@ module.exports.updateData = function(auth, doc) {
         data.push(item["Lives in"]);
         data.push(item["Number of Friends"]);
         data.push(item["messenger user id"]);
-        data.push(item["profile pic url"]); 
+        if(item["Last Interaction"] !== undefined){
+          data.push(item["Last Interaction"].text);
+          data.push(item["Last Interaction"].date);
+        }
+        data.push(item["profile pic url"]);
         valuesARR.push(data);
   });
   var sheets = google.sheets('v4');
@@ -24,7 +28,7 @@ module.exports.updateData = function(auth, doc) {
 	spreadsheetId: '10utEusTbOMFvtxeqp8XgpfFiJxv6cYy0aOSdVzAkuTI',
     /* 1H5HOiSbuDs-gJRfnSVkksGf97Y6FpXu1MoX2NBHPxco langroo oficial
 	//spreadsheetId: '10utEusTbOMFvtxeqp8XgpfFiJxv6cYy0aOSdVzAkuTI' teste sheet,*/
-    range: 'Student - DATA2!A2:J', //Change Sheet1 if your worksheet's name is something else
+    range: 'Student - DATA2!A2:K', //Change Sheet1 if your worksheet's name is something else
     valueInputOption: "USER_ENTERED",
     resource: {
       values:valuesARR

@@ -10,18 +10,6 @@ module.exports = function(app){
       console.log("Scheduler running every 20 minutes");
       let  qy = {},
       mdName = 'Student',
-      studentSchema = {
-          "first name": String,
-          "last name": String,
-          "messenger user id": String,
-          "profile pic url": String,
-          "profileLink": String,
-          "startDate": String,
-          "age": String,
-          "Nationality": String,
-          "Lives in": String,
-          "Number of Friends": String,
-        },
       projection = {   "startDate":1,
               "profileLink":1,
               "first name":1,
@@ -31,15 +19,15 @@ module.exports = function(app){
               "Lives in":1,
               "Number of Friends":1,
               "weeks since first interaction":1,
-              "last Answer to bot":1,
+              "Last Interaction":1,
               "profile pic url":1};
-      let  customcallback =  function(err, data){
-        if(err)throw err;
+      let  customFun =  function(data,closing){
         authentication.authenticate().then((auth)=>{
           gFunctions.updateData(auth, data);
         });
+        return closing;
       };
-      mongooseFn.getDoc(qy,projection,mdName,studentSchema,customcallback);
+      mongooseFn.getDoc(qy,projection,mdName,customFun);
   });
 
   app.get('/',function(req,res){
@@ -55,33 +43,19 @@ module.exports = function(app){
     };
   	res.json({ok:'ok'});
   });
-
+  app.get('/Student/Interactions',function(req,res){
+    let doc = req.query,
+        qy = {"messenger user id":doc["messenger user id"]};
+    doc.date = getDate();
+    res.json(mongooseFn.populateDocs('interaction',doc,qy));//(fnName,doc,query)
+  });
   app.get('/insertOrUpd/Student',function(req,res){
   	let doc = req.query,
-  		mdName = 'Student',
-      studentSchema = {
-      		"first name": String,
-      		"last name": String,
-      		"messenger user id": String,
-      		"profile pic url": String,
-      		"profileLink": String,
-      		"startDate": String,
-      		"age": String,
-      		"Nationality": String,
-      		"Lives in": String,
-      		"Number of Friends": String,
-      	},
-        collection = 'students',
-        dtbase = 'langroo';
-  	doc.startDate = getDate();
+  		mdName = 'Student';
+    doc.startDate = getDate();
     let select = { 'messenger user id' : doc['messenger user id']};
-    //mongooseFn.update(select, studentSchema, mdName, doc);
-    mongoFunctions.insertRowMongo(doc,collection,dtbase,select); /*
-  	authentication.authenticate().then((auth)=>{
-  		gFunctions.appendData(auth, doc);
-  	});
-  	mongoFunctions.insertRowMongo(doc, collection, dtbase);
-    */
+    mongooseFn.insert(select, mdName, doc);
+
   	res.json({ok:'ok'});
   });
 
@@ -96,7 +70,8 @@ module.exports = function(app){
   		month =0+month;
   	}
   	var hour = fullDate.getHours(),
-  		min = fullDate.getMinutes();
+  		  min = fullDate.getMinutes();
+	  if(min.length == 1){ min = '0' +min;}
   	return date+"/"+month+"/"+fullDate.getFullYear()+" "+hour+":"+min;
   };
 };

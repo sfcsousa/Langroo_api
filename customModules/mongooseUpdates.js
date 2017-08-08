@@ -5,78 +5,101 @@ let authentication = require("../authentication");
 let gFunctions = require('./googleFunctions');
 let mSchema = mongoose.Schema;
 
-let insertFunction = function(dschema, mdName, data){
-  let db = mongoose.createConnection();
-  let r;
-  let dSchema = new mSchema(dschema);
-  //connect to the database
-  db.open(url+dbS);
-
-  switch (mdName) {
-      case 'Interest':
-          let Interest = db.model(mdName, dschema);
-          Interest(data).save(function(err){
-            if(err)throw err;
-            closingMongo(db,dbS);
-          });
-      break;
-      case 'Student':
-        let Student = db.model(mdName, dschema);
-        let newStudent = new Student(data).save(function(err){
+let populateDocs = function(fnName,doc,query){
+    let conn = mongoose.createConnection(url+dbS);
+    let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
+    switch (fnName) {
+      case 'interaction':
+        let Interaction = modelsIndex.interaction,
+            Student = modelsIndex.student;
+        Student.findOne(query).select({"messenger user id": 1, "_id":1}).exec(function(err,student){
           if(err)throw err;
-          closingMongo(db,dbS);
-          console.log('Item saved');
+          if (student){
+              doc.student_id = student._id;
+              new_interaction = new Interaction(doc);
+              new_interaction.save(function(err){
+                Student.update(query,{$set : {"Last Interaction":{text:new_interaction.text,date:new_interaction.date }}},function(err,stu){
+                  if(err)throw err;
+                  return closingMongo(conn,dbS);
+                });
+              });
+            }else{
+                console.log("doc msg id: ", doc["messenger user id"]);
+                let nStu = {"messenger user id": doc["messenger user id"].toString(),
+                            "Last Interaction": {text:doc.text,date:doc.date}
+                           };
+                Student.create(nStu,function(err,stu){
+                  if(err)throw err;
+                  doc.student_id = stu._id;
+                  new_interaction = new Interaction(doc);
+                  new_interaction.save(function(err){
+                    if(err)throw err;
+                    return closingMongo(conn,dbS);
+                  });
+                });
+            }
         });
-      break;
-    default:
-  }
-}
-let updateFunction = function(conditions, dschema, mdName, data){
-    let db = mongoose.createConnection();
-    let r;
-    dschema = new mSchema(dschema);
-    //connect to the database
-    db.open(url+dbS);
-    switch (mdName) {
-        case 'Student':
-          let Student = db.model(mdName, dschema);
-          options = {upsert: true,
-                    new:true};
-          Student.findOneAndUpdate(conditions, { $set: data}, options, function(err, doc){
-             if(err)throw err;
-             closingMongo(db,dbS);
-            console.log('Item updated');
-          });
         break;
       default:
 
     }
-}
-let getDocFunction = function(query, projection, mdName, dschema,cb){
-  let db = mongoose.createConnection();
-  let rdata;
-  dschema = new mSchema(dschema);
-  db.open(url+dbS);
-  switch (mdName) {
+};
+let insertFunction = function(qy, fnName, doc){
+  //custom connection to database;
+  let conn = mongoose.createConnection(url+dbS);
+  let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
+  switch (fnName) {
       case 'Student':
-        dschema.post('find', function(){
-          closingMongo(db,dbS);
+        let Student = modelsIndex.student,
+            qy = {"messenger user id": doc["messenger user id"]};
+        Student.findOne(qy).select({"messenger user id": 1, "_id":1}).exec(function(err,student){
+            if(err)throw err;
+            if (student){
+              doc.myDate = doc.startDate;
+      				delete doc.startDate;
+              Student.update(qy,{$set : doc },function(err,stu){
+                if(err)throw err;
+                console.log('1 record updated, id: ', stu._id);
+                return closingMongo(conn,dbS);
+              });
+            }else{
+              Student.create(doc,function(err,stu){
+                if(err)throw err;
+                console.log('1 record created, id: ',stu._id);
+                return closingMongo(conn,dbS);
+              });
+            }
         });
-        let Student = db.model(mdName, dschema);
-        Student.find(query, projection,cb);
       break;
     default:
-
+  }
+  return {ok:'ok'};
+}
+let getDocFunction = function(query, projection, mdName,cb){
+  let conn = mongoose.createConnection(url+dbS);
+  let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
+  switch (mdName) {
+      case 'Student':
+        Student = modelsIndex.student;
+        //Student.post('find', function(){
+        //});
+        Student.find(query, projection,function(err,data){
+            if(err)throw err;
+            cb(data,closingMongo(conn,dbS));
+        });
+      break;
+    default:
   }
 }
 let closingMongo = function(db, dbS){
+                    //conn, db name
   db.close(function(){
     console.log('Info: Closing connection with mongo DB, con: ', dbS);
+    return "{ok:'ok'}";
   });
 }
-
 module.exports = {
   insert: insertFunction,
-  update: updateFunction,
-  getDoc: getDocFunction
+  getDoc: getDocFunction,
+  populateDocs: populateDocs
 }
