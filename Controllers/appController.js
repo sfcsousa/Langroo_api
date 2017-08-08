@@ -52,9 +52,7 @@ module.exports = function(app){
     // last user freeform input
     doc.date = getDate();
     cb = function(res, msg){
-      let messageArr = [];
-      messageArr.push(msg);
-      res.send(messageArr);
+      res.send(msg);
     };
     cbObj = {
       callb : cb,
