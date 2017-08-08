@@ -5,7 +5,7 @@ let authentication = require("../authentication");
 let gFunctions = require('./googleFunctions');
 let mSchema = mongoose.Schema;
 
-let populateDocs = function(fnName,doc,query){
+let populateDocs = function(fnName,doc,query,cbObj){
     let conn = mongoose.createConnection(url+dbS);
     let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
     switch (fnName) {
@@ -20,7 +20,8 @@ let populateDocs = function(fnName,doc,query){
               new_interaction.save(function(err){
                 Student.update(query,{$set : {"Last Interaction":{text:new_interaction.text,date:new_interaction.date }}},function(err,stu){
                   if(err)throw err;
-                  return closingMongo(conn,dbS);
+                  closingMongo(conn,dbS);
+                  return cbObj.callb(cbObj.response,cbObj.message);
                 });
               });
             }else{
@@ -34,7 +35,8 @@ let populateDocs = function(fnName,doc,query){
                   new_interaction = new Interaction(doc);
                   new_interaction.save(function(err){
                     if(err)throw err;
-                    return closingMongo(conn,dbS);
+                    closingMongo(conn,dbS);
+                    return cbObj.cb(cbObj.response,cbObj.message);
                   });
                 });
             }

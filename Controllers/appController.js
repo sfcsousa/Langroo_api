@@ -5,7 +5,7 @@ module.exports = function(app){
   let mongooseFn = require('../customModules/mongooseUpdates');
   let schedule = require('node-schedule');
 
-  let cronTask = '*/2 * * * *';
+  let cronTask = '*/59 8-20 * * *';
   let sheetUpdater =  schedule.scheduleJob(cronTask,function(){
       console.log("Scheduler running every 20 minutes");
       let  qy = {},
@@ -45,9 +45,23 @@ module.exports = function(app){
   });
   app.get('/Student/Interactions',function(req,res){
     let doc = req.query,
-        qy = {"messenger user id":doc["messenger user id"]};
+        qy = {"messenger user id":doc["messenger user id"]},
+        msg = {"redirect_to_blocks": [doc["last visited block name"]]};
+    doc["chatFuel_block_id"] = doc["last visited block id"];
+    doc["chatFuel_block_name"] = doc["last visited block name"];
+    // last user freeform input
     doc.date = getDate();
-    res.json(mongooseFn.populateDocs('interaction',doc,qy));//(fnName,doc,query)
+    cb = function(res, msg){
+      let messageArr = [];
+      messageArr.push(msg);
+      res.send(messageArr);
+    };
+    cbObj = {
+      callb : cb,
+      message : msg,
+      response : res
+    }
+    mongooseFn.populateDocs('interaction',doc,qy,cbObj)//(fnName,doc,query,cbObj)
   });
   app.get('/insertOrUpd/Student',function(req,res){
   	let doc = req.query,
