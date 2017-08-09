@@ -31,7 +31,7 @@ module.exports = function(app){
   });
 
   app.get('/',function(req,res){
-  	res.send('root route of server! ' +  port);
+  	res.send('root route of server! ');
   	res.end();
   });
   app.get('/insertOrUpd/Interests',function(req,res){
