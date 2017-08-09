@@ -3,8 +3,9 @@ let express = require('express');
 let app =  express();
 let bodyParser = require('body-parser');
 let controller = require('./Controllers/appController');
+let config = require('./Controllers/config');
 
-var port = 9000; // homolog
+var port = config.server.port; // homolog
 
 app.use(bodyParser.json());
 

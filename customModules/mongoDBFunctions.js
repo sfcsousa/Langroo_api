@@ -2,7 +2,8 @@
 let MongoClient = require('mongodb').MongoClient;
 let Server = require('mongodb').Server;
 let assert = require('assert');
-var url = 'mongodb://localhost:27017/';
+let config = require('../Controllers/config');
+var url = confif.mongo.url;
 
 module.exports.insertRowMongo = function(doc, collection, dtbase, select){
 

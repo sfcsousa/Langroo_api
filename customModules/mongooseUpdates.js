@@ -1,5 +1,6 @@
-var url = 'mongodb://localhost:27017/';
-var dbS = 'langroo';
+let config = require('../Controllers/config');
+var url = config.mongo.url;
+var dbS = config.mongo.db;
 let mongoose = require('mongoose');
 let authentication = require("../authentication");
 let gFunctions = require('./googleFunctions');
@@ -83,6 +84,7 @@ let insertFunction = function(qy, fnName, doc){
                       doc.text = "updated";
                       return populateDocs('interaction',doc,qy,cbObj);
                   });
+                });
               });
 
             }else{
