@@ -46,19 +46,17 @@ module.exports = function(app){
   app.get('/Student/Interactions',function(req,res){
     let doc = req.query,
         qy = {"messenger user id":doc["messenger user id"]},
-        msg = {"redirect_to_blocks": [doc["last visited block name"]]};
-    doc["chatFuel_block_id"] = doc["last visited block id"];
-    doc["chatFuel_block_name"] = doc["last visited block name"];
-    // last user freeform input
+        msg = {"redirect_to_blocks": [doc["testUserLast"]]};
     doc.date = getDate();
-    cb = function(res, msg){
-      res.send(msg);
-    };
-    cbObj = {
-      callb : cb,
-      message : msg,
-      response : res
-    }
+
+    let cb = function(res, msg){
+              res.send(msg);
+            },
+      cbObj = {
+        callb : cb,
+        message : msg,
+        response : res
+      };
     mongooseFn.populateDocs('interaction',doc,qy,cbObj)//(fnName,doc,query,cbObj)
   });
   app.get('/insertOrUpd/Student',function(req,res){

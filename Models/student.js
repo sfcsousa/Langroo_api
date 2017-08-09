@@ -13,6 +13,7 @@ module.exports = function(mongoose, dbconn){
       "Nationality": String,
       "Lives in": String,
       "Number of Friends": String,
+      "studentInfo_id":  {type: Schema.Types.ObjectId, index:true,ref:'StudentInfo'},
       "Last Interaction" : {text : String,
                             date : String}
       //"Last Interaction" : {text type:[String], ref: "Interaction"}

@@ -10,6 +10,9 @@ let populateDocs = function(fnName,doc,query,cbObj){
     let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
     switch (fnName) {
       case 'interaction':
+        doc["chatFuel_block_id"] = doc["testUserLast_id"];
+        doc["chatFuel_block_name"] = doc["testUserLast"];
+        if (!doc.text){doc.text = doc['last user freeform input'];}
         let Interaction = modelsIndex.interaction,
             Student = modelsIndex.student;
         Student.findOne(query).select({"messenger user id": 1, "_id":1}).exec(function(err,student){
@@ -53,17 +56,35 @@ let insertFunction = function(qy, fnName, doc){
   switch (fnName) {
       case 'Student':
         let Student = modelsIndex.student,
+            studentInfo = modelsIndex.studentInfo,
             qy = {"messenger user id": doc["messenger user id"]};
         Student.findOne(qy).select({"messenger user id": 1, "_id":1}).exec(function(err,student){
             if(err)throw err;
             if (student){
-              doc.myDate = doc.startDate;
+              doc.date = doc.startDate;
       				delete doc.startDate;
-              Student.update(qy,{$set : doc },function(err,stu){
+              Student.update(qy,{$set : doc, upsert:true },function(err,stu){
                 if(err)throw err;
                 console.log('1 record updated, id: ', stu._id);
-                return closingMongo(conn,dbS);
+                doc.student_id = stu._id;
+                studentInfo.update(qy,{$set:doc, upsert:true},function(err,stuInfo){
+                  stu.studentInfo_id = stuInfo._id;
+                  stu.save(function(err){
+                    if(err)throw err;
+                    console.log('1 record updated, id: ', stu._id,"Info id: ",stu.studentInfo_id);
+                    let cb = function(res, msg){
+                          return res+msg;},
+                      cbObj = {
+                        callb : cb,
+                        message : 'OK',
+                        response : "OK"
+                      };
+                      closingMongo(conn,dbS);
+                      doc.text = "updated";
+                      return populateDocs('interaction',doc,qy,cbObj);
+                  });
               });
+
             }else{
               Student.create(doc,function(err,stu){
                 if(err)throw err;
