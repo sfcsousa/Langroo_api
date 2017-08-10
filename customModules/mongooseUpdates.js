@@ -11,7 +11,7 @@ let populateDocs = function(fnName,doc,query,cbObj){
     let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
     switch (fnName) {
       case 'interaction':
-        doc["chatFuel_block_id"] = doc["testUserLast_id"];
+        doc["chatFuel_block_id"] = doc["testeUserLast_id"];
         doc["chatFuel_block_name"] = doc["testUserLast"];
         if (!doc.text){doc.text = doc['last user freeform input'];}
         let Interaction = modelsIndex.interaction,
@@ -82,6 +82,8 @@ let insertFunction = function(qy, fnName, doc){
                       };
                       closingMongo(conn,dbS);
                       doc.text = "updated";
+                      if(doc.userVoando == 'yes'){doc.text = "active";}
+
                       return populateDocs('interaction',doc,qy,cbObj);
                   });
                 });

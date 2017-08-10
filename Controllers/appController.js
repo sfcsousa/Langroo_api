@@ -63,6 +63,7 @@ module.exports = function(app){
   	let doc = req.query,
   		mdName = 'Student';
     doc.startDate = getDate();
+    doc["Lives in"] = doc.userCountry
     let select = { 'messenger user id' : doc['messenger user id']};
     mongooseFn.insert(select, mdName, doc);
 
