@@ -35,20 +35,17 @@ module.exports = function(app){
   	res.end();
   });
   app.get('/insertOrUpd/Interests',function(req,res){
-  	let interestSchema = {
-      description : String,
-      date: Date,
-      dataV: String,
-      studentId: Number
-    };
+
   	res.json({ok:'ok'});
   });
   app.get('/Student/Interactions',function(req,res){
     let doc = req.query,
         qy = {"messenger user id":doc["messenger user id"]},
-        msg = {"redirect_to_blocks": [doc["testUserLast"]]};
+        msg = {"redirect_to_blocks": [doc.testUserlast]};
     doc.date = getDate();
-
+        if(doc.userNeedsHelp ==='default'){
+          msg = {'ok':'ok'};
+        }
     let cb = function(res, msg){
               res.send(msg);
             },

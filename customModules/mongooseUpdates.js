@@ -11,8 +11,8 @@ let populateDocs = function(fnName,doc,query,cbObj){
     let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
     switch (fnName) {
       case 'interaction':
-        doc["chatFuel_block_id"] = doc["testeUserLast_id"];
-        doc["chatFuel_block_name"] = doc["testUserLast"];
+        doc["chatFuel_block_id"] = doc["testeUserLast_Id"];
+        doc["chatFuel_block_name"] = doc.testUserlast;
         if (!doc.text){doc.text = doc['last user freeform input'];}
         let Interaction = modelsIndex.interaction,
             Student = modelsIndex.student;
@@ -20,6 +20,7 @@ let populateDocs = function(fnName,doc,query,cbObj){
           if(err)throw err;
           if (student){
               doc.student_id = student._id;
+			  console.log("Interaction Document ",doc);
               new_interaction = new Interaction(doc);
               new_interaction.save(function(err){
                 Student.update(query,{$set : {"Last Interaction":{text:new_interaction.text,date:new_interaction.date }}},function(err,stu){
@@ -64,15 +65,15 @@ let insertFunction = function(qy, fnName, doc){
             if (student){
               doc.date = doc.startDate;
       				delete doc.startDate;
-              Student.update(qy,{$set : doc, upsert:true },function(err,stu){
+              console.log("doc: ",doc);
+              Student.findOneAndUpdate(qy, doc ,function(err,stu){
                 if(err)throw err;
-                console.log('1 record updated, id: ', stu._id);
-                doc.student_id = stu._id;
-                studentInfo.update(qy,{$set:doc, upsert:true},function(err,stuInfo){
-                  stu.studentInfo_id = stuInfo._id;
-                  stu.save(function(err){
+                console.log('1 record updated, id: ', student._id);
+                doc.student_id = student._id;
+                studentInfo.findOneAndUpdate(qy,doc,{ upsert:true, new:true},function(err,stuInfo){
+                  Student.update(qy,{$set : {studentInfo_id : stuInfo._id  }},function(err){
                     if(err)throw err;
-                    console.log('1 record updated, id: ', stu._id,"Info id: ",stu.studentInfo_id);
+                    console.log('1 record updated, id: ', stu._id,"Info id: ",stuInfo._id);
                     let cb = function(res, msg){
                           return res+msg;},
                       cbObj = {
