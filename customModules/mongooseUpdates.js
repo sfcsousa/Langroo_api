@@ -20,7 +20,7 @@ let populateDocs = function(fnName,doc,query,cbObj){
           if(err)throw err;
           if (student){
               doc.student_id = student._id;
-			  console.log("Interaction Document ",doc);
+			        console.log("Interaction Document ",doc);
               new_interaction = new Interaction(doc);
               new_interaction.save(function(err){
                 Student.update(query,{$set : {"Last Interaction":{text:new_interaction.text,date:new_interaction.date }}},function(err,stu){
@@ -83,8 +83,18 @@ let insertFunction = function(qy, fnName, doc){
                       };
                       closingMongo(conn,dbS);
                       doc.text = "updated";
-                      if(doc.userVoando == 'yes'){doc.text = "active";}
+                      /*Handling user state, yes = freecontent
+                      started = tutor now!*/
+                      switch (doc.userVoando) {
+                        case 'yes':
+                            doc.text = "active";
+                          break;
+                       case 'started':
+                            doc.text = "tutorActive";
+                          break;
+                        default:
 
+                      }
                       return populateDocs('interaction',doc,qy,cbObj);
                   });
                 });

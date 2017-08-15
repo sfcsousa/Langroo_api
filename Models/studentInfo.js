@@ -7,7 +7,11 @@ module.exports = function(mongoose, dbconn){
       "UserMotivation": String,
       "userLevel": String,
       "userHearAboutUs": String,
-      "languageChose": String
+      "languageChose": String,
+      "tutorGenre":String,
+      "userTime":String,
+      "userAccent":String,
+      "userTutorType":String
     });
     return dbconn.model('StudentInfo', studentInfoSchema,'StudentInfos');
 };
