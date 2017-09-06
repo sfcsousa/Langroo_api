@@ -1,6 +1,7 @@
 
 let google = require('googleapis');
 let authentication = require("../authentication");
+let conGoogle = require('../Config/config').google;
 
 module.exports.updateData = function(auth, doc) {
   let valuesARR = [];
@@ -25,10 +26,10 @@ module.exports.updateData = function(auth, doc) {
   var sheets = google.sheets('v4');
   sheets.spreadsheets.values.update({
     auth: auth,
-	spreadsheetId: '10utEusTbOMFvtxeqp8XgpfFiJxv6cYy0aOSdVzAkuTI',
+	spreadsheetId: conGoogle.spreadsheetId,
     /* 1H5HOiSbuDs-gJRfnSVkksGf97Y6FpXu1MoX2NBHPxco langroo oficial
 	//spreadsheetId: '10utEusTbOMFvtxeqp8XgpfFiJxv6cYy0aOSdVzAkuTI' teste sheet,*/
-    range: 'Student - DATA2!A2:K', //Change Sheet1 if your worksheet's name is something else
+    range: conGoogle.range, //Change Sheet1 if your worksheet's name is something else
     valueInputOption: "USER_ENTERED",
     resource: {
       values:valuesARR

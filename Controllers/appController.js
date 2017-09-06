@@ -1,10 +1,16 @@
-module.exports = function(app){
+module.exports = function(app,passport){
   let authentication = require("../authentication");
   let gFunctions = require('../customModules/googleFunctions');
   let mongoFunctions = require('../customModules/mongoDBFunctions');
   let mongooseFn = require('../customModules/mongooseUpdates');
   let schedule = require('node-schedule');
-
+    
+  var url = config.mongo.url;
+  var dbS = config.mongo.db;
+  let mongoose = require('mongoose');
+	  mongoose.Promise = global.Promise;
+  let conn = mongoose.createConnection(url+dbS);
+  
   let cronTask = '*/59 8-20 * * *';
   let sheetUpdater =  schedule.scheduleJob(cronTask,function(){
       console.log("Scheduler running every 20 minutes");
@@ -29,11 +35,10 @@ module.exports = function(app){
       };
       mongooseFn.getDoc(qy,projection,mdName,customFun);
   });
-
-  app.get('/',function(req,res){
-  	res.send('root route of server! ');
-  	res.end();
-  });
+  
+  let fbRoutes = require('./fbRoutes');
+	  fbRoutes(app, passport, mongooseFn);	
+  
   app.get('/insertOrUpd/Interests',function(req,res){
 
   	res.json({ok:'ok'});

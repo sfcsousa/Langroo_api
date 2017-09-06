@@ -1,4 +1,4 @@
-let config = require('../Controllers/config');
+let config = require('../Config/config');
 var url = config.mongo.url;
 var dbS = config.mongo.db;
 let mongoose = require('mongoose');
@@ -10,6 +10,30 @@ let populateDocs = function(fnName,doc,query,cbObj){
     let conn = mongoose.createConnection(url+dbS);
     let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
     switch (fnName) {
+	  case 'studentFB':
+		let StudentFB = modelsIndex.studentFB,
+			Student   = modelsIndex.student;
+		
+		StudentFB.findOne(query).exec((err,stuFB)=>{
+		  if(err)throw err;
+          if (stuFB){
+                stuFB["messenger user id"] = doc['messenger user id'];
+				Student.findOne({"messenger user id":doc['messenger user id']}).exec((err,student)=>{
+					if(err)throw err;
+					if(student){
+						stuFB.student_id = student._id;
+						stuFB.save(function(err){
+							closingMongo(conn,dbS);
+							cbObj.req.user = stuFB;
+							cbObj.req.user['first name'] = student['first name'];
+							return cbObj.fn(cbObj.req,cbObj.res,cbObj.next);
+						});
+					}
+				});
+			
+			}
+		});
+		break;
       case 'interaction':
         doc["chatFuel_block_id"] = doc["testeUserLast_Id"];
         doc["chatFuel_block_name"] = doc.testUserlast;
@@ -41,7 +65,7 @@ let populateDocs = function(fnName,doc,query,cbObj){
                   new_interaction.save(function(err){
                     if(err)throw err;
                     closingMongo(conn,dbS);
-                    return cbObj.cb(cbObj.response,cbObj.message);
+                    return cbObj.callb(cbObj.response,cbObj.message);
                   });
                 });
             }
@@ -117,6 +141,32 @@ let getDocFunction = function(query, projection, mdName,cb){
   let conn = mongoose.createConnection(url+dbS);
   let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
   switch (mdName) {
+	  case 'assignedcontent':
+		let AssContent = modelsIndex.assignedContent;
+		AssContent.find(query, projection,function(err,data){
+			if(err) throw err;
+			closingMongo(conn,dbS);
+			return cb.fn(cb.req, cb.res, data);
+		});
+	  break;
+	  case 'content':
+		let Content = modelsIndex.content;
+		let AssContent = modelsIndex.assignedContent;
+		Content.findOne(query).select(projection).exec(function(err,content){
+            if(err)throw err;
+			if(content){
+				AssContent.findOne({'content_id':content._id},function(err,assContent){
+					assContent.completed = true;
+					assContent.save(function(err){
+						if (err)
+                           throw err;
+						   closingMongo(conn,dbS);
+						   return cb.fn(cb.req, cb.res, content);
+					})
+				});
+			}
+        });
+	  break;
       case 'Student':
         Student = modelsIndex.student;
         //Student.post('find', function(){
