@@ -40,8 +40,8 @@ module.exports = function(app, passport, mongooseUpd) {
 			cb = function(req, res, contentObj){
 				res.render('content.ejs', {
 					user     : req.user, // get the user out of session and pass to template
-					content  : contentObj
-			}),
+					content  : contentObj});
+			},
 			projection = {
 				'content_id':1,
 				'student_id':1,

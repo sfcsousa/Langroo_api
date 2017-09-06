@@ -9,7 +9,7 @@ module.exports = function(mongoose, dbconn){
       "description"	: String,
       "content_id" 	: {	type: Schema.Types.ObjectId,
 						index:true,
-						ref:'Content'}
+						ref:'Content'},
 	  "completed"	: {
 						type		:	Boolean,
 						default	:	false

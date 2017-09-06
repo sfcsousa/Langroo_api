@@ -1,18 +1,20 @@
 module.exports = function(app,passport){
-  let authentication = require("../authentication");
-  let gFunctions = require('../customModules/googleFunctions');
-  let mongoFunctions = require('../customModules/mongoDBFunctions');
-  let mongooseFn = require('../customModules/mongooseUpdates');
-  let schedule = require('node-schedule');
+  let authentication 	= require("../authentication");
+  let gFunctions 		= require('../customModules/googleFunctions');
+  let mongooseFn 	= require('../customModules/mongooseUpdates');
+  let schedule 		= require('node-schedule');
+  let config 		= require('../Config/config');
     
-  var url = config.mongo.url;
-  var dbS = config.mongo.db;
-  let mongoose = require('mongoose');
-	  mongoose.Promise = global.Promise;
-  let conn = mongoose.createConnection(url+dbS);
+  var url 				= config.mongo.url;
+  var dbS 				= config.mongo.db;
   
-  let cronTask = '*/59 8-20 * * *';
-  let sheetUpdater =  schedule.scheduleJob(cronTask,function(){
+  let mongoose 			= require('mongoose');
+	  mongoose.Promise 	= global.Promise;
+	  
+  let conn 				= mongoose.createConnection(url+dbS);
+  
+  let cronTask 		= '*/59 8-20 * * *';
+  let sheetUpdater 	=  schedule.scheduleJob(cronTask,function(){
       console.log("Scheduler running every 20 minutes");
       let  qy = {},
       mdName = 'Student',

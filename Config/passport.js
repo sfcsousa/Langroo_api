@@ -1,9 +1,9 @@
 let FacebookStrategy  = require("passport-facebook").Strategy;
-let configAuth       = require('./config');
-var url = config.mongo.url;
-var dbS = config.mongo.db;
-let mongoose = require('mongoose');
-let conn = mongoose.createConnection(url+dbS);
+let configAuth       = require('config');
+var url 				= configAuth.mongo.url;
+var dbS 				= configAuth.mongo.db;
+let mongoose 		= require('mongoose');
+let conn 			= mongoose.createConnection(url+dbS);
 
 module.exports = function(passport) {
 

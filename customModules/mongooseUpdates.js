@@ -9,10 +9,12 @@ let mSchema = mongoose.Schema;
 let populateDocs = function(fnName,doc,query,cbObj){
     let conn = mongoose.createConnection(url+dbS);
     let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
+	let Interaction 	= modelsIndex.interaction,
+        Student 		= modelsIndex.student,
+		StudentFB 	= modelsIndex.studentFB;
+		
     switch (fnName) {
 	  case 'studentFB':
-		let StudentFB = modelsIndex.studentFB,
-			Student   = modelsIndex.student;
 		
 		StudentFB.findOne(query).exec((err,stuFB)=>{
 		  if(err)throw err;
@@ -38,9 +40,8 @@ let populateDocs = function(fnName,doc,query,cbObj){
         doc["chatFuel_block_id"] = doc["testeUserLast_Id"];
         doc["chatFuel_block_name"] = doc.testUserlast;
         if (!doc.text){doc.text = doc['last user freeform input'];}
-        let Interaction = modelsIndex.interaction,
-            Student = modelsIndex.student;
-        Student.findOne(query).select({"messenger user id": 1, "_id":1}).exec(function(err,student){
+        
+			Student.findOne(query).select({"messenger user id": 1, "_id":1}).exec(function(err,student){
           if(err)throw err;
           if (student){
               doc.student_id = student._id;
@@ -137,12 +138,15 @@ let insertFunction = function(qy, fnName, doc){
   }
   return {ok:'ok'};
 }
-let getDocFunction = function(query, projection, mdName,cb){
-  let conn = mongoose.createConnection(url+dbS);
-  let modelsIndex = require("../Models/modelsIndex")(mongoose,conn);
+let getDocFunction 	= function(query, projection, mdName,cb){
+  
+  let conn		 	= mongoose.createConnection(url+dbS);
+  let modelsIndex 	= require("../Models/modelsIndex")(mongoose,conn);
+  let Content 		= modelsIndex.content;
+  let AssContent 	= modelsIndex.assignedContent;
+  
   switch (mdName) {
 	  case 'assignedcontent':
-		let AssContent = modelsIndex.assignedContent;
 		AssContent.find(query, projection,function(err,data){
 			if(err) throw err;
 			closingMongo(conn,dbS);
@@ -150,8 +154,6 @@ let getDocFunction = function(query, projection, mdName,cb){
 		});
 	  break;
 	  case 'content':
-		let Content = modelsIndex.content;
-		let AssContent = modelsIndex.assignedContent;
 		Content.findOne(query).select(projection).exec(function(err,content){
             if(err)throw err;
 			if(content){
